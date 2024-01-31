@@ -4,8 +4,9 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Post, Group
-from .serializers import PostSerializer, GroupSerializer, CommentSerializer
-from .permission import IsOwnerOrReadOnly
+from api.serializers import PostSerializer, GroupSerializer, CommentSerializer
+from api.permission import IsOwnerOrReadOnly
+
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -16,10 +17,10 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        instance.delete()
+    # def perform_destroy(self, instance):
+    #     if instance.author != self.request.user:
+    #         raise PermissionDenied('Изменение чужого контента запрещено!')
+    #     instance.delete()
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -31,10 +32,15 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get_queryset(self):
+    def post_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        return post.comments
+        return post
+
+    def get_queryset(self):
+        return self.post_queryset().comments.all()
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        serializer.save(author=self.request.user, post=post)
+        serializer.save(
+            author=self.request.user,
+            post=self.post_queryset()
+        )
