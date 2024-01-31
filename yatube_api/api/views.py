@@ -1,12 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
-from posts.models import Post, Group
-from api.serializers import PostSerializer, GroupSerializer, CommentSerializer
 from api.permission import IsOwnerOrReadOnly
-
+from api.serializers import PostSerializer, GroupSerializer, CommentSerializer
+from posts.models import Post, Group
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -16,11 +14,6 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    # def perform_destroy(self, instance):
-    #     if instance.author != self.request.user:
-    #         raise PermissionDenied('Изменение чужого контента запрещено!')
-    #     instance.delete()
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
