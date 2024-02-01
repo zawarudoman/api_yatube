@@ -3,8 +3,6 @@ from django.db import models
 
 User = get_user_model()
 
-VALUE_LETTER = 25
-
 
 class Group(models.Model):
     """Model group."""
@@ -14,7 +12,7 @@ class Group(models.Model):
     description = models.TextField(verbose_name='Описание')
 
     def __str__(self):
-        return self.title[VALUE_LETTER]
+        return self.title[0:25]
 
 
 class Post(models.Model):
@@ -28,7 +26,6 @@ class Post(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='posts',
         verbose_name='Автор'
     )
     image = models.ImageField(
@@ -40,17 +37,16 @@ class Post(models.Model):
     group = models.ForeignKey(
         Group,
         on_delete=models.SET_NULL,
-        related_name='posts',
         blank=True,
         null=True,
         verbose_name='Поле для группы'
     )
 
     class Meta:
-        default_related_name = 'post'
+        default_related_name = 'posts'
 
     def __str__(self):
-        return self.text[VALUE_LETTER]
+        return self.text[0:25]
 
 
 class Comment(models.Model):
@@ -76,4 +72,4 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return self.text[VALUE_LETTER]
+        return self.text[0:25]
